@@ -24,22 +24,11 @@ public class ServerClient extends JFrame{
 	}
 	
 	private void runPeerDiscovery() {
+		synchronized (peerList) {
 		getPeersThread = new GetPeersThread(serverClient, responseWindow, peerList, peerID, peerServerPort);
 		getPeersThread.start();	
 		peerList.addAll(getPeersThread.getPeerList());
-		while(true) {
-			if(!getPeersThread.isAlive()) {
-				showMessage("thread dead\n");
-				try {
-					connectToPeers();
-					break;
-				}
-				catch(Exception e) {
-					continue;
-				}
-			}	
 		}
-				
 	}
 	
 	private void reservePeerServerPort() {
@@ -62,16 +51,18 @@ public class ServerClient extends JFrame{
 		}
 	}
 	
+	@SuppressWarnings("static-access")
 	private void connectToPeers() {
-		try {
-			showMessage("Attempting to open peer server socket\n");
-			peerClient = peerServer.accept();
-			peerConnectionThread = new PeerConnectionThread(responseWindow, peerClient, Integer.parseInt(peerList.get(peerList.size() - 1)[0]), peerList);
-			peerConnectionThread.start();
-		} 
-		catch (IOException e) {
-			e.printStackTrace();
-		}
+			synchronized (peerList) {
+				try {
+					peerConnectionThread.sleep(2000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				showMessage("peerList size pre thread call: " +  Integer.toString(peerList.size()) + "\n");
+				peerConnectionThread = new PeerConnectionThread(responseWindow, peerServer, Integer.parseInt(peerList.get(peerList.size() - 1)[0]), peerList);
+				peerConnectionThread.start();
+			}
 	}
 	
 	private void initServerClient() {
@@ -87,6 +78,7 @@ public class ServerClient extends JFrame{
 		});
 		reservePeerServerPort();
 		runPeerDiscovery();
+		connectToPeers();
 	}
 	
 	private void showMessage(final String text){
