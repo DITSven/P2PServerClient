@@ -12,6 +12,8 @@ public class PeerConnectionThread extends Thread{
 	ArrayList<String[]> peersToConnectTo;
 	int peerID, peerLocation;
 	String serverLine, clientLine;
+	PeerConnectionServerThread serverThread;
+	PeerConnectionClientThread clientThread;
 	
 	public PeerConnectionThread(JTextArea responseWindow, ServerSocket peerServer, int peerID, ArrayList<String[]> peerList){
 		this.responseWindow = responseWindow;
@@ -65,12 +67,12 @@ public class PeerConnectionThread extends Thread{
 	}
 	
 	private void openServerThread() {
-		PeerConnectionServerThread serverThread = new PeerConnectionServerThread(peerServer, responseWindow);
+		serverThread = new PeerConnectionServerThread(peerServer, responseWindow);
 		serverThread.start();
 	}
 	
 	private void openClientThread() {
-		PeerConnectionClientThread clientThread = new PeerConnectionClientThread(clientSockets, peersToConnectTo, responseWindow);
+		clientThread = new PeerConnectionClientThread(clientSockets, peersToConnectTo, responseWindow);
 		clientThread.start();
 	}
 	
@@ -82,6 +84,11 @@ public class PeerConnectionThread extends Thread{
 				}
 			}
 		);
+	}
+	
+	public void close() {
+		clientThread.close();
+		serverThread.close();
 	}
 	
 	public void run() {

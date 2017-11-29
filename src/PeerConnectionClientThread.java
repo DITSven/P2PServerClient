@@ -75,6 +75,9 @@ public class PeerConnectionClientThread extends Thread {
 					if(responseLine.equals("SERVER-START")) {
 						showMessage("Connected to peer as client\n");
 					}
+					if(responseLine.equals("SERVER-CLOSE")) {
+						close();
+					}
 				}
 			}
 		}
@@ -92,6 +95,30 @@ public class PeerConnectionClientThread extends Thread {
 			}
 		);
 	}
+	
+	public void close() {
+		try {
+			for (BufferedReader in : inputList) {
+				in.close();
+			}
+			for (ObjectInputStream inObj : inputObjectList) {
+				inObj.close();
+			}
+			for (PrintWriter out : outputList) {
+				out.close();
+			}
+			for (ObjectOutputStream outObj : outputObjectList) {
+				outObj.close();
+			}
+			for (Socket client : clientList) {
+				client.close();
+			}
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	
 	public void run() {
 		openClient();

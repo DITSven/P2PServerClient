@@ -66,6 +66,20 @@ public class PeerConnectionServerThread extends Thread {
 		);
 	}
 	
+	public void close() {
+		output.println("SERVER-CLOSE");
+		try {
+			input.close();
+			inputObject.close();
+			output.close();
+			outputObject.close();
+			client.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	public void run() {
 		openServer();
 		openStreams();
